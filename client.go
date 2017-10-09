@@ -1,7 +1,6 @@
 package poeditor
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -145,34 +144,33 @@ const (
 	FilterNotProofread = "not_proofread"
 )
 
-func (l Language) Export(fileFormat string, filters []string, tags []string) (io.Reader, error) {
+func (l Language) Export(fileFormat string, filters []string, tags []string, dest io.Writer) error {
 	params := url.Values{"type": {fileFormat}}
 	if len(filters) > 0 {
 		jsonFilters, err := json.Marshal(filters)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		params["filters"] = []string{string(jsonFilters)}
 	}
 	if len(tags) > 0 {
 		jsonTags, err := json.Marshal(tags)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		params["tags"] = []string{string(jsonTags)}
 	}
 	exportRes := exportResult{}
 	err := l.post("/projects/export", params, &exportRes)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	export, err := http.Get(exportRes.URL)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var buf bytes.Buffer
-	io.Copy(&buf, export.Body)
-	return &buf, nil
+	_, err = io.Copy(dest, export.Body)
+	return err
 }
 
 type exportResult struct {
