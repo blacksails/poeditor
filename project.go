@@ -29,6 +29,47 @@ func (poe *POEditor) ViewProject(id int) (*Project, error) {
 	return res.Project.toProject(poe), nil
 }
 
+// AddProject creates a new project with the given name and description
+func (poe *POEditor) AddProject(name, description string) (*Project, error) {
+	res := projectResult{}
+	err := poe.post("/projects/add", url.Values{
+		"name":        []string{name},
+		"description": []string{description},
+	}, &res)
+	if err != nil {
+		return nil, err
+	}
+	return res.Project.toProject(poe), nil
+}
+
+/*
+Update updates the project according to the map[string]string.
+
+		...
+		p, err := p.Update(map[string]string{
+			"name": "a project name",
+			"description": "a project description"
+			"reference_language": "a reference language code"
+		})
+
+Omitted key value pairs are not updated. Only `name`, `description` and
+`reference_language` can be updated.
+*/
+func (p *Project) Update(props map[string]string) (*Project, error) {
+	res := projectResult{}
+	updates := url.Values{}
+	for k, v := range props {
+		if k == "name" || k == "description" || k == "reference_language" {
+			updates[k] = []string{v}
+		}
+	}
+	err := p.post("/projects/update", updates, &res)
+	if err != nil {
+		return nil, err
+	}
+	return res.Project.toProject(p.POEditor), nil
+}
+
 // ListLanguages lists all the available languages in the project
 func (p *Project) ListLanguages() ([]Language, error) {
 	res := languagesResult{}
