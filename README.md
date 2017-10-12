@@ -38,7 +38,7 @@ The following endpoints are wrapped/still need to get wrapped
 
 - [ ] Projects
   - [x] List
-  - [ ] View
+  - [x] View
   - [ ] Add
   - [ ] Update
   - [ ] Delete
