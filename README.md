@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/blacksails/poeditor?status.svg)](https://godoc.org/github.com/blacksails/poeditor)
+
 # poeditor
 
 This is a delicious go API wrapper for POEditor. The project strives to convert
