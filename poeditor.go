@@ -1,11 +1,16 @@
 package poeditor
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -29,7 +34,7 @@ func (poe *POEditor) ListProjects() ([]Project, error) {
 	res := projectsResult{}
 	err := poe.post("/projects/list", url.Values{}, &res)
 	if err != nil {
-		return []Project{}, nil
+		return []Project{}, err
 	}
 	ps := make([]Project, len(res.Projects))
 	for i, p := range res.Projects {
@@ -45,7 +50,13 @@ func (poe *POEditor) post(endpoint string, params url.Values, res interface{}) e
 		return err
 	}
 	poeRes := poEditorResponse{Result: res}
-	json.NewDecoder(resp.Body).Decode(&poeRes)
+	if os.Getenv("DEBUG") == "true" {
+		var body bytes.Buffer
+		json.NewDecoder(io.TeeReader(resp.Body, &body)).Decode(&poeRes)
+		log.Println(body.String())
+	} else {
+		json.NewDecoder(resp.Body).Decode(&poeRes)
+	}
 	code, err := strconv.Atoi(poeRes.Response.Code)
 	if err != nil {
 		return err
@@ -71,17 +82,15 @@ func (r response) ToError() Error {
 	return Error{Status: r.Status, Code: r.Code, Message: r.Message}
 }
 
-type projectsResult struct {
-	Projects []project `json:"projects"`
+const poEditorTimeLayout string = "2006-01-02T15:04:05Z0700"
+
+type poEditorTime struct {
+	time.Time
 }
 
-type project struct {
-	ID                int       `json:"id"`
-	Name              string    `json:"name"`
-	Description       string    `json:"description"`
-	Public            int       `json:"public"`
-	Open              int       `json:"open"`
-	ReferenceLanguage string    `json:"reference_language"`
-	Terms             int       `json:"terms"`
-	Created           time.Time `json:"created"`
+func (t *poEditorTime) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	pt, err := time.Parse(poEditorTimeLayout, s)
+	t.Time = pt
+	return err
 }

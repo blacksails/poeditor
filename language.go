@@ -105,3 +105,14 @@ func (l Language) post(endpoint string, params url.Values, res interface{}) erro
 type exportResult struct {
 	URL string `json:"url"`
 }
+
+type languagesResult struct {
+	Languages []language
+}
+
+type language struct {
+	Name         string  `json:"name"`
+	Code         string  `json:"code"`
+	Translations int     `json:"translations"`
+	Percentage   float32 `json:"percentage"`
+}
