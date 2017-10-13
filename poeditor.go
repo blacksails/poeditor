@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -32,7 +32,7 @@ func (poe *POEditor) Project(id int) *Project {
 // ListProjects lists all the projects that are accessable by the used APIKey
 func (poe *POEditor) ListProjects() ([]Project, error) {
 	res := projectsResult{}
-	err := poe.post("/projects/list", url.Values{}, &res)
+	err := poe.post("/projects/list", nil, nil, &res)
 	if err != nil {
 		return []Project{}, err
 	}
@@ -43,9 +43,40 @@ func (poe *POEditor) ListProjects() ([]Project, error) {
 	return ps, nil
 }
 
-func (poe *POEditor) post(endpoint string, params url.Values, res interface{}) error {
-	params["api_token"] = []string{poe.apiToken}
-	resp, err := http.PostForm(fmt.Sprintf("https://api.poeditor.com/v2%s", endpoint), params)
+func (poe *POEditor) post(endpoint string, fields map[string]string, files map[string]io.Reader, res interface{}) error {
+	if fields == nil {
+		fields = make(map[string]string)
+	}
+	fields["api_token"] = poe.apiToken
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	for k, v := range fields {
+		err := writer.WriteField(k, v)
+		if err != nil {
+			return err
+		}
+	}
+	for k, v := range files {
+		w, err := writer.CreateFormFile(k, k)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(w, v)
+		if err != nil {
+			return err
+		}
+	}
+	err := writer.Close()
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("https://api.poeditor.com/v2%s", endpoint), &body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

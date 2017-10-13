@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/url"
 )
 
 // Language represents a single language of a project
@@ -17,23 +16,23 @@ type Language struct {
 // formats, see the FileFormat constants. Terms can be filtered using the
 // Filter constants. Terms can also be filtered by tags.
 func (l Language) Export(fileFormat string, filters []string, tags []string, dest io.Writer) error {
-	params := url.Values{"type": {fileFormat}}
+	fields := map[string]string{"type": fileFormat}
 	if len(filters) > 0 {
 		jsonFilters, err := json.Marshal(filters)
 		if err != nil {
 			return err
 		}
-		params["filters"] = []string{string(jsonFilters)}
+		fields["filters"] = string(jsonFilters)
 	}
 	if len(tags) > 0 {
 		jsonTags, err := json.Marshal(tags)
 		if err != nil {
 			return err
 		}
-		params["tags"] = []string{string(jsonTags)}
+		fields["tags"] = string(jsonTags)
 	}
 	exportRes := exportResult{}
-	err := l.post("/projects/export", params, &exportRes)
+	err := l.post("/projects/export", fields, nil, &exportRes)
 	if err != nil {
 		return err
 	}
@@ -97,9 +96,12 @@ const (
 	FilterNotProofread = "not_proofread"
 )
 
-func (l Language) post(endpoint string, params url.Values, res interface{}) error {
-	params["language"] = []string{l.Code}
-	return l.Project.post(endpoint, params, res)
+func (l Language) post(endpoint string, fields map[string]string, files map[string]io.Reader, res interface{}) error {
+	if fields == nil {
+		fields = make(map[string]string)
+	}
+	fields["language"] = l.Code
+	return l.Project.post(endpoint, fields, nil, res)
 }
 
 type exportResult struct {
