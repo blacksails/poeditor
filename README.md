@@ -48,7 +48,7 @@ The following endpoints are wrapped/still need to get wrapped
 - [ ] Languages
   - [x] Available
   - [x] List
-  - [ ] Add
+  - [x] Add
   - [ ] Update
   - [ ] Delete
 - [ ] Terms

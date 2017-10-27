@@ -32,6 +32,12 @@ func (p *Project) ListLanguages() ([]Language, error) {
 	return ls, nil
 }
 
+// AddLanguage adds a new language to the project. See
+// POEditor.AvailableLanguages for a list of supported language codes.
+func (p *Project) AddLanguage(code string) error {
+	return p.post("/languages/add", map[string]string{"language": code}, nil, nil)
+}
+
 // AvailableLanguage is a language supported by POEditor
 type AvailableLanguage struct {
 	Name string `json:"name"`
