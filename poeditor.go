@@ -44,18 +44,23 @@ func (poe *POEditor) ListProjects() ([]Project, error) {
 }
 
 func (poe *POEditor) post(endpoint string, fields map[string]string, files map[string]io.Reader, res interface{}) error {
+	// Initiate fields if nil
 	if fields == nil {
 		fields = make(map[string]string)
 	}
+	// Set API Token
 	fields["api_token"] = poe.apiToken
+	// Initiate multipart writer
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
+	// Write key value fields
 	for k, v := range fields {
 		err := writer.WriteField(k, v)
 		if err != nil {
 			return err
 		}
 	}
+	// Write files
 	for k, v := range files {
 		w, err := writer.CreateFormFile(k, k)
 		if err != nil {
@@ -70,6 +75,7 @@ func (poe *POEditor) post(endpoint string, fields map[string]string, files map[s
 	if err != nil {
 		return err
 	}
+	// Send request
 	req, err := http.NewRequest("POST", fmt.Sprintf("https://api.poeditor.com/v2%s", endpoint), &body)
 	if err != nil {
 		return err
@@ -80,6 +86,7 @@ func (poe *POEditor) post(endpoint string, fields map[string]string, files map[s
 	if err != nil {
 		return err
 	}
+	// Decode response
 	poeRes := poEditorResponse{Result: res}
 	if os.Getenv("DEBUG") == "true" {
 		var body bytes.Buffer
