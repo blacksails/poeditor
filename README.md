@@ -41,7 +41,7 @@ The following endpoints are wrapped/still need to get wrapped
   - [x] View
   - [x] Add
   - [x] Update
-  - [ ] Delete
+  - [x] Delete
   - [ ] Upload
   - [ ] Sync
   - [x] Export
