@@ -46,7 +46,7 @@ The following endpoints are wrapped/still need to get wrapped
   - [x] Sync
   - [x] Export
 - [ ] Languages
-  - [ ] Available
+  - [x] Available
   - [x] List
   - [ ] Add
   - [ ] Update
