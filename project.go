@@ -20,6 +20,20 @@ type Project struct {
 	Created           time.Time
 }
 
+// ListProjects lists all the projects that are accessable by the used APIKey
+func (poe *POEditor) ListProjects() ([]Project, error) {
+	res := projectsResult{}
+	err := poe.post("/projects/list", nil, nil, &res)
+	if err != nil {
+		return []Project{}, err
+	}
+	ps := make([]Project, len(res.Projects))
+	for i, p := range res.Projects {
+		ps[i] = Project{POEditor: poe, ID: p.ID}
+	}
+	return ps, nil
+}
+
 // ViewProject returns project with given ID
 func (poe *POEditor) ViewProject(id int) (*Project, error) {
 	res := projectResult{}
