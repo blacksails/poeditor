@@ -36,14 +36,14 @@ for _, p := range ps {
 ## Wrapper completeness
 The following endpoints are wrapped/still need to get wrapped
 
-- [ ] Projects
+- [x] Projects
   - [x] List
   - [x] View
   - [x] Add
   - [x] Update
   - [x] Delete
   - [x] Upload
-  - [ ] Sync
+  - [x] Sync
   - [x] Export
 - [ ] Languages
   - [ ] Available

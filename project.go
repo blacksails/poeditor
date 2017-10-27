@@ -2,7 +2,6 @@ package poeditor
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"strconv"
 	"time"
@@ -122,15 +121,6 @@ func (p *Project) Upload(reader io.Reader, options UploadOptions) (UploadResult,
 	return res, nil
 }
 
-var (
-	// ErrorUploadUpdating is returned from Upload when the value of Updating is invalid
-	ErrorUploadUpdating = errors.New("Updating must be one of terms, terms_translations or translations")
-	// ErrorUploadLanguage is return when language code is missing
-	ErrorUploadLanguage = errors.New("Language code is required when uploading translations")
-	// ErrorUpdateFields is returned when passing invalid fields to update
-	ErrorUpdateFields = errors.New("Tried to update invalid field. Valid fields are name, description, reference_language")
-)
-
 const (
 	// UploadTerms is a valid value of UploadOptions.Updating
 	UploadTerms = "terms"
@@ -153,15 +143,49 @@ type UploadOptions struct {
 
 // UploadResult is returned when uploading a file
 type UploadResult struct {
-	Terms        UploadCountResult `json:"terms"`
-	Translations UploadCountResult `json:"translations"`
+	Terms        CountResult `json:"terms"`
+	Translations CountResult `json:"translations"`
 }
 
-// UploadCountResult is a part of UploadResult and shows counts for uploads
-type UploadCountResult struct {
+// CountResult is a part of UploadResult and returned directly from
+// Project.Sync. It shows counts for uploaded/synced terms and translations
+type CountResult struct {
 	Parsed  int `json:"parsed"`
 	Added   int `json:"added"`
 	Deleted int `json:"deleted"`
+}
+
+// Sync syncs project terms with the given list of terms.
+//
+// CAUTION: this is a destructive operation. Any term not found in the input
+// array will be deleted from the project.
+func (p *Project) Sync(terms []Term) (CountResult, error) {
+	jsonTerms, err := json.Marshal(terms)
+	if err != nil {
+		return CountResult{}, err
+	}
+	var res syncResult
+	err = p.post("/projects/sync", map[string]string{"data": string(jsonTerms)}, nil, &res)
+	if err != nil {
+		return CountResult{}, err
+	}
+	return res.Terms, nil
+}
+
+type syncResult struct {
+	Terms CountResult `json:"terms"`
+}
+
+// Term represents a POEditor Term. These are sent to the POEditor APIs using
+// the Sync method.
+type Term struct {
+	Project   *Project `json:"-"`
+	Term      string   `json:"term"`
+	Context   string   `json:"context,omitempty"`
+	Reference string   `json:"reference,omitempty"`
+	Plural    string   `json:"plural,omitempty"`
+	Comment   string   `json:"comment,omitempty"`
+	Tags      []string `json:"tags,omitempty"`
 }
 
 // ListLanguages lists all the available languages in the project
