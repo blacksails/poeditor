@@ -3,6 +3,7 @@ package poeditor
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -135,6 +136,55 @@ func (p *Project) Upload(reader io.Reader, options UploadOptions) (UploadResult,
 	return res, nil
 }
 
+// Sync syncs project terms with the given list of terms.
+//
+// CAUTION: this is a destructive operation. Any term not found in the input
+// array will be deleted from the project.
+func (p *Project) Sync(terms []Term) (CountResult, error) {
+	jsonTerms, err := json.Marshal(terms)
+	if err != nil {
+		return CountResult{}, err
+	}
+	var res syncResult
+	err = p.post("/projects/sync", map[string]string{"data": string(jsonTerms)}, nil, &res)
+	if err != nil {
+		return CountResult{}, err
+	}
+	return res.Terms, nil
+}
+
+// Export extracts the language in the given fileformat. For available file
+// formats, see the FileFormat constants. Terms can be filtered using the
+// Filter constants. Terms can also be filtered by tags.
+func (l Language) Export(fileFormat string, filters []string, tags []string, dest io.Writer) error {
+	fields := map[string]string{"type": fileFormat}
+	if len(filters) > 0 {
+		jsonFilters, err := json.Marshal(filters)
+		if err != nil {
+			return err
+		}
+		fields["filters"] = string(jsonFilters)
+	}
+	if len(tags) > 0 {
+		jsonTags, err := json.Marshal(tags)
+		if err != nil {
+			return err
+		}
+		fields["tags"] = string(jsonTags)
+	}
+	exportRes := exportResult{}
+	err := l.post("/projects/export", fields, nil, &exportRes)
+	if err != nil {
+		return err
+	}
+	export, err := http.Get(exportRes.URL)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(dest, export.Body)
+	return err
+}
+
 const (
 	// UploadTerms is a valid value of UploadOptions.Updating
 	UploadTerms = "terms"
@@ -155,12 +205,6 @@ type UploadOptions struct {
 	FuzzyTrigger   bool
 }
 
-// UploadResult is returned when uploading a file
-type UploadResult struct {
-	Terms        CountResult `json:"terms"`
-	Translations CountResult `json:"translations"`
-}
-
 // CountResult is a part of UploadResult and returned directly from
 // Project.Sync. It shows counts for uploaded/synced terms and translations
 type CountResult struct {
@@ -169,52 +213,63 @@ type CountResult struct {
 	Deleted int `json:"deleted"`
 }
 
-// Sync syncs project terms with the given list of terms.
-//
-// CAUTION: this is a destructive operation. Any term not found in the input
-// array will be deleted from the project.
-func (p *Project) Sync(terms []Term) (CountResult, error) {
-	jsonTerms, err := json.Marshal(terms)
-	if err != nil {
-		return CountResult{}, err
-	}
-	var res syncResult
-	err = p.post("/projects/sync", map[string]string{"data": string(jsonTerms)}, nil, &res)
-	if err != nil {
-		return CountResult{}, err
-	}
-	return res.Terms, nil
+// UploadResult is returned when uploading a file
+type UploadResult struct {
+	Terms        CountResult `json:"terms"`
+	Translations CountResult `json:"translations"`
 }
 
-type syncResult struct {
-	Terms CountResult `json:"terms"`
-}
+const (
+	// FileFormatPO specifies a .po file
+	FileFormatPO = "po"
+	// FileFormatPOT specifies a .pot file
+	FileFormatPOT = "pot"
+	// FileFormatMO specifies a .mo file
+	FileFormatMO = "mo"
+	// FileFormatXLS specifies an .xls file
+	FileFormatXLS = "xls"
+	// FileFormatCSV specifies a .csv file
+	FileFormatCSV = "csv"
+	// FileFormatRESW specifies an .resw file
+	FileFormatRESW = "resw"
+	// FileFormatRESX specifies an .resx file
+	FileFormatRESX = "resx"
+	// FileFormatAndroidStrings specifies strings should be in android format
+	FileFormatAndroidStrings = "android_strings"
+	// FileFormatAppleStrings specifies strings should be in apple format
+	FileFormatAppleStrings = "apple_strings"
+	// FileFormatXLIFF specifies an .xliff file
+	FileFormatXLIFF = "xliff"
+	// FileFormatProperties specifies a .propterties file
+	FileFormatProperties = "properties"
+	// FileFormatKeyValueJSON specifies a .json file in key value format
+	FileFormatKeyValueJSON = "key_value_json"
+	// FileFormatJSON specifies a .json file
+	FileFormatJSON = "json"
+	// FileFormatXMB specifies an .xmb file
+	FileFormatXMB = "xmb"
+	// FileFormatXTB specifies an .xtb file
+	FileFormatXTB = "xtb"
+)
 
-// Term represents a POEditor Term. These are sent to the POEditor APIs using
-// the Sync method.
-type Term struct {
-	Project   *Project `json:"-"`
-	Term      string   `json:"term"`
-	Context   string   `json:"context,omitempty"`
-	Reference string   `json:"reference,omitempty"`
-	Plural    string   `json:"plural,omitempty"`
-	Comment   string   `json:"comment,omitempty"`
-	Tags      []string `json:"tags,omitempty"`
-}
-
-// ListLanguages lists all the available languages in the project
-func (p *Project) ListLanguages() ([]Language, error) {
-	res := languagesResult{}
-	err := p.post("/languages/list", nil, nil, &res)
-	if err != nil {
-		return []Language{}, err
-	}
-	ls := make([]Language, len(res.Languages))
-	for i, l := range res.Languages {
-		ls[i] = Language{Project: p, Code: l.Code}
-	}
-	return ls, nil
-}
+const (
+	// FilterTranslated filters terms in translated state
+	FilterTranslated = "translated"
+	// FilterUntranslated filters terms in untranslated state
+	FilterUntranslated = "untranslated"
+	// FilterFuzzy filters terms in fuzzy state
+	FilterFuzzy = "fuzzy"
+	// FilterNotFuzzy filters terms in not fuzzy state
+	FilterNotFuzzy = "not_fuzzy"
+	// FilterAutomatic filters terms in automatic state
+	FilterAutomatic = "automatic"
+	// FilterNotAutomatic filters terms in not automatic state
+	FilterNotAutomatic = "not_automatic"
+	// FilterProofread filters terms in proofread state
+	FilterProofread = "proofread"
+	// FilterNotProofread filters terms in not proofread state
+	FilterNotProofread = "not_proofread"
+)
 
 func (p *Project) post(endpoint string, fields map[string]string, files map[string]io.Reader, res interface{}) error {
 	if fields == nil {
@@ -255,4 +310,12 @@ func (p project) toProject(poe *POEditor) *Project {
 		Terms:             p.Terms,
 		Created:           p.Created.Time,
 	}
+}
+
+type syncResult struct {
+	Terms CountResult `json:"terms"`
+}
+
+type exportResult struct {
+	URL string `json:"url"`
 }
