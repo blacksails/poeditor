@@ -1,6 +1,7 @@
 package poeditor
 
 import (
+	"encoding/json"
 	"io"
 )
 
@@ -36,6 +37,48 @@ func (p *Project) ListLanguages() ([]Language, error) {
 // POEditor.AvailableLanguages for a list of supported language codes.
 func (p *Project) AddLanguage(code string) error {
 	return p.post("/languages/add", map[string]string{"language": code}, nil, nil)
+}
+
+// Update inserts or overwrites translations for a language
+func (l *Language) Update(translations []Translation) (CountResult, error) {
+	var res CountResult
+	// Typecheck translations
+	for _, t := range translations {
+		if _, ok := t.Translation.(Singular); ok {
+			continue
+		}
+		if _, ok := t.Translation.(Plural); ok {
+			continue
+		}
+		return res, ErrTranslationInvalid
+	}
+	// Encode and send translations
+	ts, err := json.Marshal(translations)
+	if err != nil {
+		return res, err
+	}
+	err = l.post("/languages/update", map[string]string{"data": string(ts)}, nil, &res)
+	return res, err
+}
+
+// Translation is used to update translations in POEditor. The Translation field
+// must be either a Singular or a Plural type.
+type Translation struct {
+	Term        string      `json:"term"`
+	Context     string      `json:"context"`
+	Translation interface{} `json:"translation"`
+}
+
+// Singular is a singular translation
+type Singular struct {
+	Content string `json:"content"`
+	Fuzzy   int    `json:"fuzzy"`
+}
+
+// Plural is a plural translation
+type Plural struct {
+	One   string `json:"one"`
+	Other string `json:"other"`
 }
 
 // AvailableLanguage is a language supported by POEditor

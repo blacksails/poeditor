@@ -49,7 +49,7 @@ The following endpoints are wrapped/still need to get wrapped
   - [x] Available
   - [x] List
   - [x] Add
-  - [ ] Update
+  - [x] Update
   - [ ] Delete
 - [ ] Terms
   - [ ] List

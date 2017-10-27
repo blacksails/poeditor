@@ -22,6 +22,9 @@ var (
 	ErrorUploadUpdating = errors.New("Updating must be one of terms, terms_translations or translations")
 	// ErrorUploadLanguage is return when language code is missing
 	ErrorUploadLanguage = errors.New("Language code is required when uploading translations")
- // ErrorUpdateFields is returned when passing invalid fields to Project.Update
+	// ErrorUpdateFields is returned when passing invalid fields to Project.Update
 	ErrorUpdateFields = errors.New("Tried to update invalid field. Valid fields are name, description, reference_language")
+	// ErrTranslationInvalid is return when a Singular or Plural type is expected,
+	// but something else is found
+	ErrTranslationInvalid = errors.New("invalid translation type please use Singular or Plural")
 )
