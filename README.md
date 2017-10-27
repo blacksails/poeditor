@@ -42,7 +42,7 @@ The following endpoints are wrapped/still need to get wrapped
   - [x] Add
   - [x] Update
   - [x] Delete
-  - [ ] Upload
+  - [x] Upload
   - [ ] Sync
   - [x] Export
 - [ ] Languages
