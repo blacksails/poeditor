@@ -59,5 +59,5 @@ The following endpoints are wrapped/still need to get wrapped
   - [ ] Add comment
 - [ ] Contributors
   - [ ] List
-  - [ ] Add
+  - [x] Add
   - [ ] Remove
