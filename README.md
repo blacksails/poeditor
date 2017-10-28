@@ -60,4 +60,4 @@ The following endpoints are wrapped/still need to get wrapped
 - [ ] Contributors
   - [ ] List
   - [x] Add
-  - [ ] Remove
+  - [x] Remove

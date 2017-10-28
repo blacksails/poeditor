@@ -16,3 +16,13 @@ func (l *Language) AddContributor(name, email string) error {
 		"email": email,
 	}, nil, nil)
 }
+
+// RemoveAdmin removes a user as a project admin
+func (p *Project) RemoveAdmin(email string) error {
+	return p.post("/contributors/remove", map[string]string{"email": email}, nil, nil)
+}
+
+// RemoveContributor removes a contributor from the language
+func (l *Language) RemoveContributor(email string) error {
+	return l.post("/contributors/remove", map[string]string{"email": email}, nil, nil)
+}
