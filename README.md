@@ -45,12 +45,12 @@ The following endpoints are wrapped/still need to get wrapped
   - [x] Upload
   - [x] Sync
   - [x] Export
-- [ ] Languages
+- [x] Languages
   - [x] Available
   - [x] List
   - [x] Add
   - [x] Update
-  - [ ] Delete
+  - [x] Delete
 - [ ] Terms
   - [ ] List
   - [ ] Add

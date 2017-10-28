@@ -61,6 +61,11 @@ func (l *Language) Update(translations []Translation) (CountResult, error) {
 	return res, err
 }
 
+// Delete deletes the language
+func (l *Language) Delete() error {
+	return l.post("/languages/delete", nil, nil, nil)
+}
+
 // Translation is used to update translations in POEditor. The Translation field
 // must be either a Singular or a Plural type.
 type Translation struct {
