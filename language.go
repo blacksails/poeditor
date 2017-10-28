@@ -75,10 +75,7 @@ type Translation struct {
 }
 
 // Singular is a singular translation
-type Singular struct {
-	Content string `json:"content"`
-	Fuzzy   int    `json:"fuzzy"`
-}
+type Singular string
 
 // Plural is a plural translation
 type Plural struct {
