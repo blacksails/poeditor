@@ -2,21 +2,19 @@ package poeditor_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/blacksails/poeditor"
 )
 
-func TestTermUnmarshalJSON(t *testing.T) {
-	unmarshalTests := []poeditor.Term{
+func TestTranslationUnmarshalJSON(t *testing.T) {
+	unmarshalTests := []poeditor.Translation{
 		{
-			Term:        "test",
-			Translation: poeditor.Singular("test"),
+			Content: "test",
 		},
 		{
-			Translation: poeditor.Plural{
+			Content: poeditor.Plural{
 				One:   "1 test",
 				Other: "2 tests",
 			},
@@ -28,14 +26,11 @@ func TestTermUnmarshalJSON(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		var t2 poeditor.Term
+		var t2 poeditor.Translation
 		if err := json.Unmarshal(tJSON, &t2); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 		if !reflect.DeepEqual(t1, t2) {
-			_, ok := t2.Translation.(poeditor.Singular)
-			fmt.Println(ok)
-			fmt.Println(reflect.TypeOf(t1.Translation), reflect.TypeOf(t2.Translation))
 			t.Errorf("\nExpected %+v \nGot      %+v", t1, t2)
 		}
 	}

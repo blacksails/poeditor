@@ -40,20 +40,21 @@ func (p *Project) AddLanguage(code string) error {
 }
 
 // Update inserts or overwrites translations for a language
-func (l *Language) Update(translations []Translation) (CountResult, error) {
+func (l *Language) Update(terms []Term) (CountResult, error) {
 	var res CountResult
 	// Typecheck translations
-	for _, t := range translations {
-		if _, ok := t.Translation.(Singular); ok {
+	for _, t := range terms {
+		c := t.Translation.Content
+		if _, ok := c.(string); ok {
 			continue
 		}
-		if _, ok := t.Translation.(Plural); ok {
+		if _, ok := c.(Plural); ok {
 			continue
 		}
 		return res, ErrTranslationInvalid
 	}
 	// Encode and send translations
-	ts, err := json.Marshal(translations)
+	ts, err := json.Marshal(terms)
 	if err != nil {
 		return res, err
 	}
@@ -64,23 +65,6 @@ func (l *Language) Update(translations []Translation) (CountResult, error) {
 // Delete deletes the language
 func (l *Language) Delete() error {
 	return l.post("/languages/delete", nil, nil, nil)
-}
-
-// Translation is used to update translations in POEditor. The Translation field
-// must be either a Singular or a Plural type.
-type Translation struct {
-	Term        string      `json:"term"`
-	Context     string      `json:"context"`
-	Translation interface{} `json:"translation"`
-}
-
-// Singular is a singular translation
-type Singular string
-
-// Plural is a plural translation
-type Plural struct {
-	One   string `json:"one"`
-	Other string `json:"other"`
 }
 
 // AvailableLanguage is a language supported by POEditor
