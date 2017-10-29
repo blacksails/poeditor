@@ -31,6 +31,17 @@ func (l *Language) ListTerms() ([]Term, error) {
 	return res.Terms, err
 }
 
+// AddTerms adds the given terms to the project
+func (p *Project) AddTerms(terms []Term) (CountResult, error) {
+	var res addTermsResult
+	jsonTerms, err := json.Marshal(terms)
+	if err != nil {
+		return res.Terms, err
+	}
+	err = p.post("/terms/add", map[string]string{"data": string(jsonTerms)}, nil, &res)
+	return res.Terms, err
+}
+
 // Translation is used to update translations in POEditor. The field Content
 // must be either a string or a Plural type.
 type Translation struct {
@@ -73,4 +84,8 @@ type Plural struct {
 
 type listTermsResult struct {
 	Terms []Term
+}
+
+type addTermsResult struct {
+	Terms CountResult
 }

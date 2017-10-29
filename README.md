@@ -53,7 +53,7 @@ The following endpoints are wrapped/still need to get wrapped
   - [x] Delete
 - [ ] Terms
   - [x] List
-  - [ ] Add
+  - [x] Add
   - [ ] Update
   - [ ] Delete
   - [ ] Add comment
