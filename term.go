@@ -2,22 +2,22 @@ package poeditor
 
 import "encoding/json"
 
-// BaseTerm is used reference a particular term. This is only used publicly in
+// TermBase is used reference a particular term. This is only used publicly in
 // term deletion, but it is utilzed heavliy in the code aswell.
-type BaseTerm struct {
+type TermBase struct {
 	Term    string `json:"term"`
 	Context string `json:"context,omitempty"`
 }
 
-// TranslationTerm is used when updating translations for a language
-type TranslationTerm struct {
-	BaseTerm
+// TermTranslation is used when updating translations for a language
+type TermTranslation struct {
+	TermBase
 	Translation Translation `json:"translation,omitempty"`
 }
 
 // Term is used when adding new terms, syncing or listing terms
 type Term struct {
-	BaseTerm
+	TermBase
 	Plural    string       `json:"plural,omitempty"`
 	Reference string       `json:"reference,omitempty"`
 	Comment   string       `json:"comment,omitempty"`
@@ -26,22 +26,22 @@ type Term struct {
 	Updated   poEditorTime `json:"updated,omitempty"`
 }
 
-// UpdateTerm is used when updating terms
-type UpdateTerm struct {
+// TermUpdate is used when updating terms
+type TermUpdate struct {
 	Term
 	NewTerm    string `json:"new_term,omitempty"`
 	NewContext string `json:"new_context,omitempty"`
 }
 
-// AddComment is used when adding a comment to a term
-type AddComment struct {
-	BaseTerm
+// TermComment is used when adding a comment to a term
+type TermComment struct {
+	TermBase
 	Comment string `json:"comment"`
 }
 
-// TranslatedTerm is used when listing a project's terms along with translations
+// TermTranslated is used when listing a project's terms along with translations
 // for a language
-type TranslatedTerm struct {
+type TermTranslated struct {
 	Term
 	Translation Translation `json:"translation"`
 }
@@ -55,7 +55,7 @@ func (p *Project) ListTerms() ([]Term, error) {
 
 // ListTerms returns all terms in the project along with the translations for
 // the language
-func (l *Language) ListTerms() ([]TranslatedTerm, error) {
+func (l *Language) ListTerms() ([]TermTranslated, error) {
 	var res listTranslatedTermsResult
 	err := l.post("/terms/list", nil, nil, &res)
 	return res.Terms, err
@@ -74,7 +74,7 @@ func (p *Project) AddTerms(terms []Term) (CountResult, error) {
 
 // UpdateTerms lets you change the text, context, reference, plural and tags of
 // terms. Setting fuzzyTrigger to true marks associated translations as fuzzy.
-func (p *Project) UpdateTerms(terms []UpdateTerm, fuzzyTrigger bool) (CountResult, error) {
+func (p *Project) UpdateTerms(terms []TermUpdate, fuzzyTrigger bool) (CountResult, error) {
 	var res termsCountResult
 	jsonTerms, err := json.Marshal(terms)
 	if err != nil {
@@ -92,7 +92,7 @@ func (p *Project) UpdateTerms(terms []UpdateTerm, fuzzyTrigger bool) (CountResul
 }
 
 // DeleteTerms deletes the given terms from the project
-func (p *Project) DeleteTerms(terms []BaseTerm) (CountResult, error) {
+func (p *Project) DeleteTerms(terms []TermBase) (CountResult, error) {
 	var res termsCountResult
 	jsonTerms, err := json.Marshal(terms)
 	if err != nil {
@@ -103,7 +103,7 @@ func (p *Project) DeleteTerms(terms []BaseTerm) (CountResult, error) {
 }
 
 // AddComments adds the given comments
-func (p *Project) AddComments(comments []AddComment) (CountResult, error) {
+func (p *Project) AddComments(comments []TermComment) (CountResult, error) {
 	var res termsCountResult
 	jsonTerms, err := json.Marshal(comments)
 	if err != nil {
@@ -158,5 +158,5 @@ type listTermsResult struct {
 }
 
 type listTranslatedTermsResult struct {
-	Terms []TranslatedTerm
+	Terms []TermTranslated
 }
