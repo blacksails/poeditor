@@ -54,7 +54,7 @@ The following endpoints are wrapped/still need to get wrapped
 - [ ] Terms
   - [x] List
   - [x] Add
-  - [ ] Update
+  - [x] Update
   - [ ] Delete
   - [ ] Add comment
 - [x] Contributors

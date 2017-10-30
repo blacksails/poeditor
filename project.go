@@ -145,7 +145,7 @@ func (p *Project) Sync(terms []Term) (CountResult, error) {
 	if err != nil {
 		return CountResult{}, err
 	}
-	var res syncResult
+	var res termsCountResult
 	err = p.post("/projects/sync", map[string]string{"data": string(jsonTerms)}, nil, &res)
 	if err != nil {
 		return CountResult{}, err
@@ -312,7 +312,7 @@ func (p project) toProject(poe *POEditor) *Project {
 	}
 }
 
-type syncResult struct {
+type termsCountResult struct {
 	Terms CountResult `json:"terms"`
 }
 

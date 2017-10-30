@@ -40,7 +40,8 @@ func (p *Project) AddLanguage(code string) error {
 }
 
 // Update inserts or overwrites translations for a language
-func (l *Language) Update(terms []Term) (CountResult, error) {
+// TODO: add fuzzy_trigger
+func (l *Language) Update(terms []TranslationTerm) (CountResult, error) {
 	var res CountResult
 	// Typecheck translations
 	for _, t := range terms {

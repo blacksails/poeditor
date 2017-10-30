@@ -2,18 +2,46 @@ package poeditor
 
 import "encoding/json"
 
-// Term represents a POEditor Term. These are sent to the POEditor APIs using
-// the Sync method.
+type baseTerm struct {
+	Term    string `json:"term"`
+	Context string `json:"context,omitempty"`
+}
+
+// TranslationTerm is used when updating translations for a language
+type TranslationTerm struct {
+	baseTerm
+	Translation Translation `json:"translation,omitempty"`
+}
+
+// Term is used when adding new terms, syncing or listing terms
 type Term struct {
-	Term        string       `json:"term"`
-	Context     string       `json:"context,omitempty"`
-	Plural      string       `json:"plural,omitempty"`
-	Created     poEditorTime `json:"created,omitempty"`
-	Updated     poEditorTime `json:"updated,omitempty"`
-	Translation Translation  `json:"translation,omitempty"`
-	Reference   string       `json:"reference,omitempty"`
-	Comment     string       `json:"comment,omitempty"`
-	Tags        []string     `json:"tags,omitempty"`
+	baseTerm
+	Plural    string       `json:"plural,omitempty"`
+	Reference string       `json:"reference,omitempty"`
+	Comment   string       `json:"comment,omitempty"`
+	Tags      []string     `json:"tags,omitempty"`
+	Created   poEditorTime `json:"created,omitempty"`
+	Updated   poEditorTime `json:"updated,omitempty"`
+}
+
+// UpdateTerm is used when updating terms
+type UpdateTerm struct {
+	Term
+	NewTerm    string `json:"new_term,omitempty"`
+	NewContext string `json:"new_context,omitempty"`
+}
+
+// AddComment is used when adding a comment to a term
+type AddComment struct {
+	baseTerm
+	Comment string `json:"comment"`
+}
+
+// TranslatedTerm is used when listing a project's terms along with translations
+// for a language
+type TranslatedTerm struct {
+	Term
+	Translation Translation `json:"translation"`
 }
 
 // ListTerms returns all terms in the project
@@ -25,20 +53,39 @@ func (p *Project) ListTerms() ([]Term, error) {
 
 // ListTerms returns all terms in the project along with the translations for
 // the language
-func (l *Language) ListTerms() ([]Term, error) {
-	var res listTermsResult
+func (l *Language) ListTerms() ([]TranslatedTerm, error) {
+	var res listTranslatedTermsResult
 	err := l.post("/terms/list", nil, nil, &res)
 	return res.Terms, err
 }
 
 // AddTerms adds the given terms to the project
 func (p *Project) AddTerms(terms []Term) (CountResult, error) {
-	var res addTermsResult
+	var res termsCountResult
 	jsonTerms, err := json.Marshal(terms)
 	if err != nil {
 		return res.Terms, err
 	}
 	err = p.post("/terms/add", map[string]string{"data": string(jsonTerms)}, nil, &res)
+	return res.Terms, err
+}
+
+// UpdateTerms lets you change the text, context, reference, plural and tags of
+// terms. Setting fuzzyTrigger to true marks associated translations as fuzzy.
+func (p *Project) UpdateTerms(terms []UpdateTerm, fuzzyTrigger bool) (CountResult, error) {
+	var res termsCountResult
+	jsonTerms, err := json.Marshal(terms)
+	if err != nil {
+		return res.Terms, err
+	}
+	fuzzy := "0"
+	if fuzzyTrigger {
+		fuzzy = "1"
+	}
+	err = p.post("/terms/update", map[string]string{
+		"data":          string(jsonTerms),
+		"fuzzy_trigger": fuzzy,
+	}, nil, &res)
 	return res.Terms, err
 }
 
@@ -86,6 +133,6 @@ type listTermsResult struct {
 	Terms []Term
 }
 
-type addTermsResult struct {
-	Terms CountResult
+type listTranslatedTermsResult struct {
+	Terms []TranslatedTerm
 }
