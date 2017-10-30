@@ -2,20 +2,22 @@ package poeditor
 
 import "encoding/json"
 
-type baseTerm struct {
+// BaseTerm is used reference a particular term. This is only used publicly in
+// term deletion, but it is utilzed heavliy in the code aswell.
+type BaseTerm struct {
 	Term    string `json:"term"`
 	Context string `json:"context,omitempty"`
 }
 
 // TranslationTerm is used when updating translations for a language
 type TranslationTerm struct {
-	baseTerm
+	BaseTerm
 	Translation Translation `json:"translation,omitempty"`
 }
 
 // Term is used when adding new terms, syncing or listing terms
 type Term struct {
-	baseTerm
+	BaseTerm
 	Plural    string       `json:"plural,omitempty"`
 	Reference string       `json:"reference,omitempty"`
 	Comment   string       `json:"comment,omitempty"`
@@ -33,7 +35,7 @@ type UpdateTerm struct {
 
 // AddComment is used when adding a comment to a term
 type AddComment struct {
-	baseTerm
+	BaseTerm
 	Comment string `json:"comment"`
 }
 
@@ -86,6 +88,28 @@ func (p *Project) UpdateTerms(terms []UpdateTerm, fuzzyTrigger bool) (CountResul
 		"data":          string(jsonTerms),
 		"fuzzy_trigger": fuzzy,
 	}, nil, &res)
+	return res.Terms, err
+}
+
+// DeleteTerms deletes the given terms from the project
+func (p *Project) DeleteTerms(terms []BaseTerm) (CountResult, error) {
+	var res termsCountResult
+	jsonTerms, err := json.Marshal(terms)
+	if err != nil {
+		return res.Terms, err
+	}
+	err = p.post("/terms/delete", map[string]string{"data": string(jsonTerms)}, nil, &res)
+	return res.Terms, err
+}
+
+// AddComments adds the given comments
+func (p *Project) AddComments(comments []AddComment) (CountResult, error) {
+	var res termsCountResult
+	jsonTerms, err := json.Marshal(comments)
+	if err != nil {
+		return res.Terms, err
+	}
+	err = p.post("/terms/add_comment", map[string]string{"data": string(jsonTerms)}, nil, &res)
 	return res.Terms, err
 }
 

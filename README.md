@@ -34,30 +34,7 @@ for _, p := range ps {
 ```
 
 ## Wrapper completeness
-The following endpoints are wrapped/still need to get wrapped
-
-- [x] Projects
-  - [x] List
-  - [x] View
-  - [x] Add
-  - [x] Update
-  - [x] Delete
-  - [x] Upload
-  - [x] Sync
-  - [x] Export
-- [x] Languages
-  - [x] Available
-  - [x] List
-  - [x] Add
-  - [x] Update
-  - [x] Delete
-- [ ] Terms
-  - [x] List
-  - [x] Add
-  - [x] Update
-  - [ ] Delete
-  - [ ] Add comment
-- [x] Contributors
-  - [x] List
-  - [x] Add
-  - [x] Remove
+All of the API endpoints have been implemented. A few of them lack proper
+testing. Personally I dont use all of them, so I am only using a few in
+production. If you find something that doesn't work please file an issue and
+I will try to make a fix asap. Pull requests are also very welcome.

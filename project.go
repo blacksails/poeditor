@@ -208,9 +208,10 @@ type UploadOptions struct {
 // CountResult is a part of UploadResult and returned directly from
 // Project.Sync. It shows counts for uploaded/synced terms and translations
 type CountResult struct {
-	Parsed  int `json:"parsed"`
-	Added   int `json:"added"`
-	Deleted int `json:"deleted"`
+	Parsed           int `json:"parsed"`
+	Added            int `json:"added"`
+	Deleted          int `json:"deleted"`
+	WithAddedComment int `json:"with_added_comment"`
 }
 
 // UploadResult is returned when uploading a file
