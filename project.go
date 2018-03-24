@@ -185,6 +185,27 @@ func (l Language) Export(fileFormat string, filters []string, tags []string, des
 	return err
 }
 
+// ListTags returns a list of tags found on the project. This is not a standard
+// API endpoint, but a useful helper never the less.
+func (p *Project) ListTags() ([]string, error) {
+	terms, err := p.ListTerms()
+	if err != nil {
+		return []string{}, err
+	}
+	tagsM := make(map[string]bool)
+	for _, term := range terms {
+		for _, tag := range term.Tags {
+			tagsM[tag] = true
+		}
+	}
+	tags := make([]string, len(tagsM))
+	i := 0
+	for tag := range tagsM {
+		tags[i] = tag
+	}
+	return tags, nil
+}
+
 const (
 	// UploadTerms is a valid value of UploadOptions.Updating
 	UploadTerms = "terms"
