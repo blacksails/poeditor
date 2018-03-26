@@ -22,15 +22,15 @@ type Project struct {
 }
 
 // ListProjects lists all the projects that are accessable by the used APIKey
-func (poe *POEditor) ListProjects() ([]Project, error) {
+func (poe *POEditor) ListProjects() ([]*Project, error) {
 	res := projectsResult{}
 	err := poe.post("/projects/list", nil, nil, &res)
 	if err != nil {
-		return []Project{}, err
+		return []*Project{}, err
 	}
-	ps := make([]Project, len(res.Projects))
+	ps := make([]*Project, len(res.Projects))
 	for i, p := range res.Projects {
-		ps[i] = Project{POEditor: poe, ID: p.ID}
+		ps[i] = p.toProject(poe)
 	}
 	return ps, nil
 }
