@@ -202,6 +202,7 @@ func (p *Project) ListTags() ([]string, error) {
 	i := 0
 	for tag := range tagsM {
 		tags[i] = tag
+		i++
 	}
 	return tags, nil
 }
