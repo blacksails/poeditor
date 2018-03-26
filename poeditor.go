@@ -88,10 +88,16 @@ func (p poEditorPoster) post(endpoint string, fields map[string]string, files ma
 	poeRes := poEditorResponse{Result: res}
 	if os.Getenv("DEBUG") == "true" {
 		var body bytes.Buffer
-		json.NewDecoder(io.TeeReader(resp.Body, &body)).Decode(&poeRes)
+		err := json.NewDecoder(io.TeeReader(resp.Body, &body)).Decode(&poeRes)
+		if err != nil {
+			return err
+		}
 		log.Println(body.String())
 	} else {
-		json.NewDecoder(resp.Body).Decode(&poeRes)
+		err := json.NewDecoder(resp.Body).Decode(&poeRes)
+		if err != nil {
+			return err
+		}
 	}
 	code, err := strconv.Atoi(poeRes.Response.Code)
 	if err != nil {
