@@ -126,6 +126,10 @@ type poEditorTime struct {
 
 func (t *poEditorTime) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
+	if s == "" {
+		t.Time = time.Time{}
+		return nil
+	}
 	pt, err := time.Parse(poEditorTimeLayout, s)
 	t.Time = pt
 	return err
