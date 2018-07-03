@@ -234,6 +234,7 @@ type CountResult struct {
 	Added            int `json:"added"`
 	Deleted          int `json:"deleted"`
 	WithAddedComment int `json:"with_added_comment"`
+	Updated          int `json:"updated"`
 }
 
 // UploadResult is returned when uploading a file

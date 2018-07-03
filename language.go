@@ -42,7 +42,7 @@ func (p *Project) AddLanguage(code string) error {
 // Update inserts or overwrites translations for a language
 // TODO: add fuzzy_trigger
 func (l *Language) Update(terms []TermTranslation) (CountResult, error) {
-	var res CountResult
+	var res UploadResult
 	// Typecheck translations
 	for _, t := range terms {
 		c := t.Translation.Content
@@ -52,15 +52,15 @@ func (l *Language) Update(terms []TermTranslation) (CountResult, error) {
 		if _, ok := c.(Plural); ok {
 			continue
 		}
-		return res, ErrTranslationInvalid
+		return res.Translations, ErrTranslationInvalid
 	}
 	// Encode and send translations
 	ts, err := json.Marshal(terms)
 	if err != nil {
-		return res, err
+		return res.Translations, err
 	}
 	err = l.post("/languages/update", map[string]string{"data": string(ts)}, nil, &res)
-	return res, err
+	return res.Translations, err
 }
 
 // Delete deletes the language
